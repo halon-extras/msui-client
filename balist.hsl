@@ -1,4 +1,4 @@
-function ScanBAList($opts, $connection, $transaction)
+function balist($opts, $connection, $transaction)
 {
     global $triggerurl;
     $senderip = $connection["remoteip"];

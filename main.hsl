@@ -1,3 +1,3 @@
 import { msui } from "./msui.hsl";
-import { ScanBAList } from "./balist.hsl";
-import { Bounce } from "./bounce.hsl";
+import { balist } from "./balist.hsl";
+import { bounce } from "./bounce.hsl";
