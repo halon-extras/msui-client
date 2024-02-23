@@ -1,4 +1,4 @@
-function bounce($to, $failed = [], $opts = []) {
+function Bounce($to, $failed = [], $opts = []) {
     $transportid = isset($opts["transportid"]) ? $opts["transportid"] : "out";
     $from        = isset($opts["from"]) ? $opts["from"] : "Mail Delivery System <postmaster@".gethostname().">";
 
