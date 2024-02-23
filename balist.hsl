@@ -1,0 +1,37 @@
+function ScanBAList($opts, $connection, $transaction)
+{
+    global $triggerurl;
+    $senderip = $connection["remoteip"];
+    $sender = $transaction["sender"];
+    $senderdomain = $transaction["senderaddress"]["domain"];
+
+    if (isset($opts["allowlist"])) {
+        foreach ($opts["allowlist"] as $alist) {
+            if (isset($opts["ip"]) and $opts["ip"] == true) {
+                if ($alist == $senderip)
+                    return 0;
+                if (pcre_match(''/\/[0-9]{1,2}$/'', $alist) and inet_includes($senderip, $alist))
+                    return 0;
+            } else {
+                if ($alist == $senderip or $alist == $senderdomain or $alist == $sender)
+                    return 0;
+                if (pcre_match(''/\/[0-9]{1,2}$/'', $alist) and inet_includes($senderip, $alist))
+                    return 0;
+                if ($alist[0] == "." and domain_includes($senderdomain, $alist))
+                    return 0;
+            }
+        }
+    }
+    if (isset($opts["blocklist"])) {
+        foreach ($opts["blocklist"] as $blist) {
+            if ($blist == $senderip or $blist == $senderdomain or $blist == $sender)
+                return 100;
+            if (pcre_match(''/\/[0-9]{1,2}$/'', $blist) and inet_includes($senderip, $blist))
+                return 100;
+            if ($blist[0] == "." and domain_includes($senderdomain, $blist))
+                return 100;
+        }
+    }
+
+    return 50;
+}
