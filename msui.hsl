@@ -158,7 +158,6 @@ class msui
         else
         {
           $settings[$identifier]["value"] = $schemaSetting["global"][$id]["value"];
-          break;
         }
       }
     }
