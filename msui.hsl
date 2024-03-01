@@ -116,21 +116,24 @@ class msui
     $globals = [];
     foreach ($schemaSettings["global"] as $id => $global)
     {
-      $globals[$id] = $global["value"];
+      $globals[] = [
+        "id" => $id,
+        "value" => $this->parseValue($schemaSettings["schema"], $global["value"])
+      ];
     }
 
     $domains = [];
     foreach ($schemaSettings["domains"]->entries() as $domain => $setting)
     {
-      $domains[$domain] = $setting["domain"]["value"];
+      $domains[] = [
+        "domain" => $domain,
+        "value" => $this->parseValue($schemaSettings["schema"], $setting["domain"]["value"])
+      ];
     }
+
     return [
-      "global" => array_map(function ($global) closure ($this, $schemaSettings) {
-        return $this->parseValue($schemaSettings["schema"], $global);
-      }, $globals),
-      "domains" => array_map(function ($domain) closure ($this, $schemaSettings) {
-        return $this->parseValue($schemaSettings["schema"], $domain);
-      }, $domains)
+      "global" => $globals,
+      "domains" => $domains
     ];
   }
 
