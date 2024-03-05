@@ -118,6 +118,7 @@ class msui
     {
       $globals[] = [
         "id" => $id,
+        "owner" => $global["owner"],
         "value" => $this->parseValue($schemaSettings["schema"], $global["value"])
       ];
     }
