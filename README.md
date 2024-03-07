@@ -22,35 +22,7 @@ yum install halon-extras-msui-client
 
 * ansible
 
-The HSL client uses the output file (`msui-config.yaml`) from the export function in MSUI (`msui.yaml`):
-
-```
-app:
-  [...]
-  configexport:
-    enabled: true
-    interval: 900
-```
-
-The function relies on the following environment variables to export and transfer data to each smtp host (/etc/halon) over SSH:
-
-```
-Environment="HALON_MSUI_ANSIBLE_OUTPUT_PATH=/tmp/msui-config.yaml"
-Environment="HALON_MSUI_ANSIBLE_HOSTS_PATH=/home/halon/hosts"
-Environment="ANSIBLE_PRIVATE_KEY_FILE=/home/halon/.ssh/id_rsa"
-Environment="ANSIBLE_REMOTE_USER=halon"
-Environment="ANSIBLE_HOST_KEY_CHECKING=false"
-```
-
-It is recommended to use a passwordless SSH key pair for SSH authentication.
-
-Example of a `/home/halon/hosts` file:
-
-```
-[smtpd]
-halon@10.0.0.1
-halon@10.0.0.2
-```
+Check out [MSUI documentation](https://docs.halon.io/msui/history.html) on how to configure MSUI.
 
 ## HSL client
 
@@ -62,7 +34,7 @@ The `msui` class needs to be [imported](https://docs.halon.io/hsl/structures.htm
 scripting:
   files:
     - id: msui-config.yaml
-      path: /msui-config.yaml
+      path: /etc/halon/msui-config.yaml
 ```
 
 ## msui()
