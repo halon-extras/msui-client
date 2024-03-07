@@ -22,7 +22,7 @@ yum install halon-extras-msui-client
 
 * ansible
 
-Check out [MSUI documentation](https://docs.halon.io/msui/history.html) on how to configure MSUI.
+Check out [MSUI documentation](https://docs.halon.io/msui/export.html) on how to configure MSUI.
 
 ## HSL client
 
