@@ -1,0 +1,242 @@
+import $config from "msui-config.yaml" with ["types" => ["Map", "Set", "PrivateKey"]];
+
+class msui
+{
+  function domainExist($domain)
+  {
+    global $config;
+    return $config["domains"]->has($domain);
+  }
+
+  function getDomain($domain)
+  {
+    global $config;
+    if ($parent = $config["domains"]->get($domain)["parent"])
+      $domain = $parent["domain"];
+    $domainData = $config["domains"]->get($domain);
+    return $domainData ?? [];
+  }
+
+  function getDomainSettings($domain)
+  {
+    global $config;
+
+    $settings = [];
+    $globalSettings = [];
+    $domainData = $this->getDomain($domain);
+    if ($domainData)
+    {
+      $domain = $domainData["domain"];
+      $globalSettings = $this->getGlobalSettingsByDomain($domainData);
+    }
+    foreach ($config["settings"]->entries() as $identifier => $schemaSetting)
+    {
+      if (!array_includes($schemaSetting["schema"]["access_type"], ["all", "domain"]))
+        continue;
+
+      $domainSettings = $schemaSetting["domains"]->get($domain);
+
+      $settings[$identifier] = $this->getInheritedValue(
+        $schemaSetting["schema"],
+        $globalSettings[$identifier] ?? [],
+        $domainSettings["domain"] ?? []
+      );
+    }
+    return $settings;
+  }
+
+  function getUser($user)
+  {
+    global $config;
+
+    $user = envelope_address_parse($user);
+    if (!$user["domain"])
+      return [];
+
+    $userData = [];
+    $domainData = $this->getDomain($user["domain"]);
+    if ($domainData)
+    {
+      $userData = $domainData["users"]->get($user["localpart"] + "@" + $domainData["domain"]);
+      if ($userData["parent"])
+      {
+        $alias = envelope_address_parse($userData["parent"]);
+        if ($alias["domain"] !== $domainData["domain"])
+          $domainData = $this->getDomain($alias["domain"]);
+        $userData = $domainData["users"]->get($userData["parent"]);
+      }
+    }
+    return $userData ?? [];
+  }
+
+  function getUserSettings($user)
+  {
+    global $config;
+
+    $globalSettings = [];
+    $settings = [];
+
+    $userData = $this->getUser($user);
+    $user = envelope_address_parse($userData["username"]);
+
+    if ($userData)
+    {
+      $domainData = $this->getDomain($user["domain"]);
+      $globalSettings = $this->getGlobalSettingsByDomain($domainData);
+    }
+
+    foreach ($config["settings"]->entries() as $identifier => $schemaSetting)
+    {
+      if (!array_includes($schemaSetting["schema"]["access_type"], ["all", "user"]))
+        continue;
+      if ($userData and $domainData)
+      {
+        $domainSettings = $schemaSetting["domains"]->get($domainData["domain"]);
+        $userSettings = $domainSettings["users"] ? $domainSettings["users"]->get($userData["username"]) : [];
+      }
+
+      $settings[$identifier] = $this->getInheritedValue(
+        $schemaSetting["schema"],
+        $globalSettings[$identifier] ?? [],
+        $domainSettings["domain"] ?? [],
+        $userSettings["user"] ?? []
+      );
+    }
+    return $settings;
+  }
+
+  function getSetting($identifier)
+  {
+    global $config;
+
+    $schemaSettings = $config["settings"]->get($identifier);
+    if (!$schemaSettings)
+      return [];
+
+    $globals = [];
+    foreach ($schemaSettings["global"] as $id => $global)
+    {
+      $globals[] = [
+        "id" => $id,
+        "owner" => $global["owner"],
+        "value" => $this->parseValue($schemaSettings["schema"], $global["value"])
+      ];
+    }
+
+    $domains = [];
+    foreach ($schemaSettings["domains"]->entries() as $domain => $setting)
+    {
+      $domains[] = [
+        "domain" => $domain,
+        "value" => $this->parseValue($schemaSettings["schema"], $setting["domain"]["value"])
+      ];
+    }
+
+    return [
+      "global" => $globals,
+      "domains" => $domains
+    ];
+  }
+
+  private function getGlobalSettingsByDomain($domainData)
+  {
+    global $config;
+
+    $settings = [];
+    $domainGlobalIds = array_map(function ($id) {
+      return $id["id"];
+    }, $domainData["settings"]["global"]);
+
+    foreach ($config["settings"]->entries() as $identifier => $schemaSetting)
+    {
+      foreach ($domainGlobalIds as $id)
+      {
+        if (!isset($schemaSetting["global"][$id]))
+          continue;
+        if ($schemaSetting["schema"]["type"] == "list")
+        {
+          $settings[$identifier]["value"] = [...($settings[$identifier]["value"] ?? []), ...$schemaSetting["global"][$id]["value"]];
+          if (!$schemaSetting["global"][$id]["inherit"])
+            break;
+        }
+        else
+        {
+          $settings[$identifier]["value"] = $schemaSetting["global"][$id]["value"];
+        }
+      }
+    }
+    return $settings;
+  }
+
+  private function getInheritedValue($schema, $global, $domain, $user = none)
+  {
+    $type = $schema["type"];
+    if (isset($user["value"]))
+      $value = $user["value"];
+    else if (isset($domain["value"]))
+      $value = $domain["value"];
+    else if (isset($global["value"]))
+      $value = $global["value"];
+    else
+      $value = $schema["default_value"];
+    if ($type === "list" or $type === "csv")
+    {
+      if (!is_array($value))
+        $value = [];
+      // merge domain settings with users
+      if (isset($user["value"]))
+        $value = $value + $domain["value"];
+      // merge global settings
+      if ($schema["merge_default"] and isset($global["value"]))
+        $value = $value + $global["value"];
+    }
+    return $this->parseValue($schema, $value);
+  }
+
+  private function parseValue($schema, $value)
+  {
+    if ($schema["type"] == "list")
+      return $this->parseList($value);
+    else if ($schema["type"] == "csv")
+      return $this->parseCSV($schema["columns"], $value);
+    else
+      return $value;
+  }
+
+  private function parseList($values)
+  {
+    if (!is_array($values))
+      return [];
+    $results = [];
+    foreach ($values as $item)
+    {
+      if (is_number($item["ttl"]) and time() > ($item["ttl"] / 1000))
+        continue;
+      $results[] = $item["value"];
+    }
+    return $results;
+  }
+
+  private function parseCSV($columns, $values)
+  {
+    if (!is_array($values))
+      return [];
+    $results = [];
+    foreach ($values as $s)
+    {
+      $arr = csv_decode($s, ["header" => false])[0];
+      $data = [];
+      foreach ($columns as $index => $column)
+      {
+        $value = $arr[$index];
+        if ($column["type"] === "number")
+          $value = number($value);
+        else if ($column["type"] === "checkbox")
+          $value = $value === "true";
+        $data[$column["name"]] = $value;
+      }
+      $results[] = $data;
+    }
+    return $results;
+  }
+}
