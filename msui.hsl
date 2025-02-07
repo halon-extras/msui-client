@@ -77,22 +77,21 @@ class msui
     $settings = [];
 
     $userData = $this->getUser($user);
-    $user = envelope_address_parse($userData["username"]);
+    $user = envelope_address_parse($userData ? $userData["username"] : $user);
 
-    if ($userData)
-    {
-      $domainData = $this->getDomain($user["domain"]);
+    $domainData = $this->getDomain($user["domain"]);
+    if ($domainData)
       $globalSettings = $this->getGlobalSettingsByDomain($domainData);
-    }
 
     foreach ($config["settings"]->entries() as $identifier => $schemaSetting)
     {
       if (!array_includes($schemaSetting["schema"]["access_type"], ["all", "user"]))
         continue;
-      if ($userData and $domainData)
+      if ($domainData)
       {
         $domainSettings = $schemaSetting["domains"]->get($domainData["domain"]);
-        $userSettings = $domainSettings["users"] ? $domainSettings["users"]->get($userData["username"]) : [];
+        if ($userData)
+          $userSettings = $domainSettings["users"] ? $domainSettings["users"]->get($userData["username"]) : [];
       }
 
       $settings[$identifier] = $this->getInheritedValue(
