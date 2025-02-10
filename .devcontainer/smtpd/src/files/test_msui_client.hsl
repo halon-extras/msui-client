@@ -90,7 +90,6 @@ test_sample_data(
 );
 
 // User settings and inherited settings tests
-
 test_sample_data(
     "User user@example.com has 'user hello world' in list setting",
     $msui->getUserSettings("user@example.com")["list"],
@@ -119,6 +118,42 @@ test_sample_data(
     "Unknown user unknown@example.com has inherited 'inherited hello world' in list setting",
     $msui->getUserSettings("unknown@example.com")["list"],
     "inherited hello world"
+);
+
+test_sample_data(
+    "Domain example.com has 'hello world' in select setting",
+    $msui->getDomainSettings("example.com")["selected"],
+    "hello world"
+);
+
+test_sample_data(
+    "Alias domain alias.example.com has 'hello world' in select setting",
+    $msui->getDomainSettings("alias.example.com")["selected"],
+    "hello world"
+);
+
+test_sample_data(
+    "Domain subdomain.example.com has default value 'default' in select setting",
+    $msui->getDomainSettings("subdomain.example.com")["selected"],
+    "default"
+);
+
+test_sample_data(
+    "User user@example.com has value 'foo bar' in select setting",
+    $msui->getUserSettings("user@example.com")["selected"],
+    "foo bar"
+);
+
+test_sample_data(
+    "Unknown user unknown@example.com has inherited 'hello world' in select setting",
+    $msui->getUserSettings("unknown@example.com")["selected"],
+    "hello world"
+);
+
+test_sample_data(
+    "Unknown user unknown@subdomain.example.com has default value 'default' in select setting",
+    $msui->getUserSettings("unknown@subdomain.example.com")["selected"],
+    "default"
 );
 
 echo $results;

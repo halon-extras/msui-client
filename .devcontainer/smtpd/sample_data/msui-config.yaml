@@ -100,3 +100,21 @@ settings: !Map
               value:
                 - foo bar,true
                 - user foo bar,true
+  selected:
+    schema:
+      access_type: all
+      type: select
+      default_value: default
+      option_values:
+        - hello world
+        - default
+        - foo bar
+    global: {}
+    domains: !Map 
+      example.com:
+        domain:
+          value: hello world
+        users: !Map 
+          user@example.com:
+            user:
+              value: foo bar
