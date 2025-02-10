@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  protect:
+    tty: true
+    platform: linux/amd64
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        HALON_REPO_USER: ${HALON_REPO_USER}
+        HALON_REPO_PASS: ${HALON_REPO_PASS}
+    volumes:
+      - ../:/workspace
+      - ./smtpd/dist:/etc/halon

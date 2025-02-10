@@ -1,0 +1,102 @@
+version: '1.17'
+domains: !Map 
+  example.com:
+    id: 1
+    domain: example.com
+    transport:
+      destination:
+        - hostname: 192.168.2.3
+          port: 25
+    settings:
+      global:
+        - id: 356a192b7913b04c54574d18c28d46e6395428ab
+    users: !Map 
+      user@example.com:
+        id: 1
+        username: user@example.com
+  alias.example.com:
+    id: 2
+    domain: alias.example.com
+    parent:
+      id: 1
+      domain: example.com
+  subdomain.example.com:
+    id: 3
+    domain: subdomain.example.com
+    transport:
+      destination: []
+    owner: example.com
+    settings:
+      global:
+        - id: 356a192b7913b04c54574d18c28d46e6395428ab
+    users: !Map {}
+settings: !Map 
+  is_enabled:
+    schema:
+      access_type: all
+      type: toggle
+      default_value: false
+      option_values: []
+    global:
+      356a192b7913b04c54574d18c28d46e6395428ab:
+        inherit: 0
+        name: global settings
+        owner: example.com
+        value: true
+    domains: !Map 
+      example.com:
+        domain:
+          value: true
+  list:
+    schema:
+      access_type: all
+      type: list
+      default_value: null
+      option_values: []
+      merge_default: true
+    global:
+      356a192b7913b04c54574d18c28d46e6395428ab:
+        inherit: 0
+        name: global settings
+        owner: example.com
+        value:
+          - value: inherited hello world
+    domains: !Map 
+      example.com:
+        domain:
+          value:
+            - value: hello world
+        users: !Map 
+          user@example.com:
+            user:
+              value:
+                - value: user hello world
+  list2:
+    schema:
+      access_type: all
+      type: csv
+      default_value: null
+      option_values: []
+      columns:
+        - name: entry
+          type: input
+        - name: enabled
+          type: checkbox
+    global:
+      356a192b7913b04c54574d18c28d46e6395428ab:
+        inherit: 0
+        name: global settings
+        owner: example.com
+        value:
+          - inherited foo bar,true
+    domains: !Map 
+      example.com:
+        domain:
+          value:
+            - foo bar,true
+        users: !Map 
+          user@example.com:
+            user:
+              value:
+                - foo bar,true
+                - user foo bar,true

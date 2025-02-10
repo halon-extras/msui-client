@@ -1,0 +1,9 @@
+version: "6.5"
+servers: []
+transportgroups: []
+scripting:
+  files:
+    - id: msui-client
+      path: msui.hsl
+    - id: msui-config.yaml
+      path: .devcontainer/smtpd/sample_data/msui-config.yaml

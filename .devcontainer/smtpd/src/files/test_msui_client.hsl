@@ -1,0 +1,124 @@
+import { msui } from "msui-client";
+$msui = msui();
+
+$debug = true;
+$results = ["passed" => 0, "tests" => 0];
+
+function test_sample_data($test, $check_result, $expect) {
+    global $debug, $results;
+    $results["tests"]++;
+    $passed = false;
+
+    if (is_array($check_result)) {
+        if (is_array($expect)) {
+
+        } else {
+            $passed = array_includes($expect, $check_result);
+        }
+    } else {
+        $passed = $check_result === $expect;
+    }
+
+    if ($passed) {
+        echo "Testcase: [PASSED]: ".$test;
+        $results["passed"]++;
+    } else {
+        echo "Testcase: [FAILED]: ".$test;
+    }
+
+    if ($debug) {
+        echo "Returned: ".$check_result;
+        echo "Expected: ".$expect;
+    }
+}
+
+// Domain exist tests
+test_sample_data(
+    "domain example.com exist",
+    $msui->domainExist("example.com"),
+    true
+);
+
+test_sample_data(
+    "alias domain alias.example.com exist",
+    $msui->domainExist("alias.example.com"),
+    true
+);
+
+// Destination tests
+test_sample_data(
+    "domain example.com has '192.168.2.3' as destination",
+    $msui->getDomain("example.com")["transport"]["destination"][0]["hostname"],
+    "192.168.2.3"
+);
+
+test_sample_data(
+    "alias domain alias.example.com has '192.168.2.3' as destination",
+    $msui->getDomain("alias.example.com")["transport"]["destination"][0]["hostname"],
+    "192.168.2.3"
+);
+
+// Domain settings and inherited settings tests
+test_sample_data(
+    "domain example.com has 'hello world' in list setting",
+    $msui->getDomainSettings("example.com")["list"],
+    "hello world"
+);
+
+test_sample_data(
+    "domain example.com has inherited 'inherited hello world' in list setting",
+    $msui->getDomainSettings("example.com")["list"],
+    "inherited hello world"
+);
+
+test_sample_data(
+    "alias domain alias.example.com has 'hello world' in list setting",
+    $msui->getDomainSettings("alias.example.com")["list"],
+    "hello world"
+);
+
+test_sample_data(
+    "alias domain alias.example.com has inherited 'inherited hello world' in list setting",
+    $msui->getDomainSettings("alias.example.com")["list"],
+    "inherited hello world"
+);
+
+test_sample_data(
+    "domain subdomain.example.com has 'inherited hello world' in list setting",
+    $msui->getDomainSettings("subdomain.example.com")["list"],
+    "inherited hello world"
+);
+
+// User settings and inherited settings tests
+
+test_sample_data(
+    "User user@example.com has 'user hello world' in list setting",
+    $msui->getUserSettings("user@example.com")["list"],
+    "user hello world"
+);
+
+test_sample_data(
+    "User user@example.com has inherited 'hello world' in list setting",
+    $msui->getUserSettings("user@example.com")["list"],
+    "hello world"
+);
+
+test_sample_data(
+    "User user@example.com has inherited 'inherited hello world' in list setting",
+    $msui->getUserSettings("user@example.com")["list"],
+    "inherited hello world"
+);
+
+test_sample_data(
+    "Unknown user unknown@example.com has inherited 'hello world' in list setting",
+    $msui->getUserSettings("unknown@example.com")["list"],
+    "hello world"
+);
+
+test_sample_data(
+    "Unknown user unknown@example.com has inherited 'inherited hello world' in list setting",
+    $msui->getUserSettings("unknown@example.com")["list"],
+    "inherited hello world"
+);
+
+echo $results;
