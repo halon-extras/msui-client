@@ -1,4 +1,29 @@
-import $config from "msui-config.yaml" with ["types" => ["Map", "Set", "PrivateKey"]];
+$config = cache [ "namespace" => "msui-client" ] config();
+
+function config()
+{
+  $yaml = File::read("file://msui-config.yaml");
+  $object = yaml_decode($yaml, [
+    "tags" => [
+      "!PrivateKey" => function ($data) {
+        return rsa_privatekey($data);
+      },
+      "!Map" => function ($data) {
+        $map = Map("string", "any");
+        foreach ($data as $k => $v)
+          $map->set($k, $v);
+        return $map;
+      },
+      "!Set" => function ($data) {
+        $map = Set("string");
+        foreach ($data as $k => $v)
+          $map->add($v);
+        return $map;
+      },
+    ]
+  ]);
+ return $object;
+}
 
 class msui
 {
