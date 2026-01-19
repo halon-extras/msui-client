@@ -208,7 +208,7 @@ class msui
       if (!is_array($value))
         $value = [];
       // merge domain settings with users
-      if (isset($user["value"]))
+      if (isset($user["value"]) and isset($domain["value"]))
         $value = $value + $domain["value"];
       // merge global settings
       if ($schema["merge_default"] and isset($global["value"]))
