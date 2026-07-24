@@ -4,15 +4,14 @@
   "workspaceFolder": "/workspace",
   "service": "protect",
   "overrideCommand": false,
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "Halon.vscode-halon",
-        "Halon.hsl-syntax",
-        "Halon.hsl-linter",
-        "Halon.hsl-debug",
-        "github.vscode-github-actions"
-      ]
-    }
-  }
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"halon.vscode-halon",
+				"halon.hsl-syntax",
+				"halon.hsl-linter",
+				"halon.hsl-debug"
+			]
+		}
+	}
 }
