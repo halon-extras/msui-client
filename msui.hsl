@@ -82,7 +82,7 @@ class msui
     $domainData = $this->getDomain($user["domain"]);
     if ($domainData)
     {
-      $userData = $domainData["users"]->get($user["localpart"] + "@" + $domainData["domain"]);
+      $userData = $domainData["users"]->get($user["localpart"] . "@" . $domainData["domain"]);
       if ($userData["parent"])
       {
         $alias = envelope_address_parse($userData["parent"]);

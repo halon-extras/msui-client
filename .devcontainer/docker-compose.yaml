@@ -9,6 +9,8 @@ services:
       args:
         HALON_REPO_USER: ${HALON_REPO_USER}
         HALON_REPO_PASS: ${HALON_REPO_PASS}
+      platforms:
+        - linux/amd64
     volumes:
       - ../:/workspace
       - ./smtpd/dist:/etc/halon
