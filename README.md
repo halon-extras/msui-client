@@ -129,6 +129,24 @@ if ($settings["dkim"])
 $settings = $msui->getUser("user@example.com");
 ```
 
+## verifyUser(email, password)
+
+Verifies the supplied email and password against a user in the config file
+
+**Params**
+
+* email `string` E-mail address
+
+* password `string` The users password
+
+**Returns**: `boolean`
+
+**Example**
+
+```
+$verified = $msui->verifyUser("user@example.com", "password");
+```
+
 ## getUserSettings(email)
 
 **Params**

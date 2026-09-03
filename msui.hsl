@@ -94,6 +94,24 @@ class msui
     return $userData ?? [];
   }
 
+  function verifyUser($user, $password)
+  {
+    $user = $this->getUser($user);
+
+    if (length($user) < 1)
+    {
+      return false;
+    }
+
+    $passwordhash = $user["password"];
+    if (!$passwordhash)
+    {
+      return false;
+    }
+
+    return crypt($password, $passwordhash) === $passwordhash;
+  }
+
   function getUserSettings($user)
   {
     global $config;
