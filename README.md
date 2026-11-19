@@ -18,7 +18,7 @@ yum install halon-extras-msui-client
 
 ## Configure MSUI
 
-### Prerequisities
+### Prerequisites
 
 * ansible
 
